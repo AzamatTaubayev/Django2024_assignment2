@@ -5,10 +5,9 @@ class IsStudent(BasePermission):
     def has_permission(self, request, view):
         return request.user.role == 'Student'
 
-class IsTeacher(BasePermission):
+class IsTeacherOrAdmin(BasePermission):
+    """
+    Allows access only to teachers or admins.
+    """
     def has_permission(self, request, view):
-        return request.user.role == 'Teacher'
-
-class IsAdmin(BasePermission):
-    def has_permission(self, request, view):
-        return request.user.role == 'Admin'
+        return request.user.role in ['Teacher', 'Admin']

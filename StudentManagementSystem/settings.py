@@ -53,6 +53,13 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ],
 }
 
 
@@ -146,4 +153,77 @@ CELERY_BROKER_URL = 'redis://localhost:6379/0'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_BEAT_SCHEDULE = {
+    'send_daily_attendance_reminder': {
+        'task': 'notifications.tasks.send_attendance_reminder',
+        'schedule': 86400.0,  # Run once a day (seconds)
+    },
+    'weekly_performance_report': {
+        'task': 'notifications.tasks.send_weekly_performance_report',
+        'schedule': 604800.0,  # Run once a week (seconds)
+    },
+}
+
 AUTH_USER_MODEL = 'users.CustomUser'
+
+# settings.py
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',  # Use the first Redis database (index 1)
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
+
+# Set cache timeout (in seconds)
+CACHE_TTL = 60 * 15  # Cache timeout of 15 minutes
+
+LOGS_DIR = Path(__file__).resolve().parent.parent / 'logs'
+LOGS_DIR.mkdir(parents=True, exist_ok=True)  # Create the directory if it doesn't exist
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': LOGS_DIR / 'django.log',  # Ensure the log file is in the 'logs' directory
+            'formatter': 'verbose',  # Optional: you can use 'simple' as well for a simpler format
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'django.db.backends': {
+            'level': 'ERROR',  # Log only database-related errors
+            'handlers': ['file'],
+            'propagate': False,
+        },
+        'myapp': {  # Logger for your application
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}

@@ -1,0 +1,7 @@
+INFO 2024-11-20 00:16:17,342 autoreload Watching for file changes with StatReloader
+WARNING 2024-11-20 00:16:22,836 log Not Found: /
+WARNING 2024-11-20 00:16:22,837 basehttp "GET / HTTP/1.1" 404 2949
+WARNING 2024-11-20 00:16:33,177 log Method Not Allowed: /api/users/register/
+WARNING 2024-11-20 00:16:33,177 basehttp "GET /api/users/register/ HTTP/1.1" 405 8425
+INFO 2024-11-20 00:16:33,208 basehttp "GET /static/rest_framework/img/grid.png HTTP/1.1" 304 0
+INFO 2024-11-20 00:16:43,094 basehttp "POST /api/users/register/ HTTP/1.1" 200 9118

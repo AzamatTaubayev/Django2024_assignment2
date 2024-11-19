@@ -5,7 +5,11 @@ from rest_framework.permissions import AllowAny
 from rest_framework.generics import CreateAPIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import UserSerializer
+import logging
+
 from .models import CustomUser
+
+logger = logging.getLogger('SMS')
 
 
 class UserRegistrationView(CreateAPIView):
@@ -25,15 +29,14 @@ class UserRegistrationView(CreateAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
 
-        # Set the role
         user.role = role
         user.save()
 
-        # Generate JWT tokens
+        logger.info(f"New user registered: {user.username}, Role: {role}, Email: {user.email}")
+
         refresh = RefreshToken.for_user(user)
         access_token = refresh.access_token
 
-        # Return user data along with tokens
         return Response({
             'user': UserSerializer(user).data,
             'access': str(access_token),

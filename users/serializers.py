@@ -1,6 +1,9 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
+from students.models import Student
+
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
@@ -17,4 +20,8 @@ class UserSerializer(serializers.ModelSerializer):
             password=validated_data['password'],
             role=role
         )
+
+        if role == 'Student':
+            Student.objects.create(user=user, name=user.username, email=user.email)
+
         return user
