@@ -1,51 +1,56 @@
-# notifications/tasks.py
 from celery import shared_task
 from django.core.mail import send_mail
-from django.utils import timezone
-from students.models import Student  # Assuming you have a Student model
+from students.models import Student
+from grades.models import Grade
+from attendance.models import Attendance
+from datetime import datetime, timedelta
+
 
 @shared_task
-def send_attendance_reminder():
-    """Send a daily reminder to students to mark their attendance."""
-    today = timezone.now().date()
+def daily_attendance_reminder():
     students = Student.objects.all()
-
     for student in students:
         send_mail(
-            'Attendance Reminder',
-            f'Hi {student.name}, please remember to mark your attendance today, {today}.',
-            'from@example.com',  # Replace with your email
-            [student.user.email],
+            'Daily Attendance Reminder',
+            'This is a reminder to mark your attendance for today.',
+            'admin@example.com',
+            [student.email],
             fail_silently=False,
         )
-    return 'Attendance reminder sent to all students.'
+    return f'Sent reminders to {students.count()} students.'
+
 
 @shared_task
-def notify_grade_update(student_id, course_name, grade):
-    """Notify students when their grade is updated."""
+def grade_update_notification(student_id, course_name, grade):
     student = Student.objects.get(id=student_id)
     send_mail(
-        'Grade Update',
-        f'Hi {student.name}, your grade for {course_name} has been updated to {grade}.',
-        'from@example.com',  # Replace with your email
-        [student.user.email],
+        'Grade Update Notification',
+        f'Your grade for {course_name} has been updated to {grade}.',
+        'admin@example.com',
+        [student.email],
         fail_silently=False,
     )
-    return 'Grade update notification sent.'
-@shared_task
-def send_weekly_performance_report():
-    """Send weekly email updates summarizing each student’s performance."""
-    students = Student.objects.all()
+    return f'Grade notification sent to {student.name}.'
 
+
+@shared_task
+def weekly_performance_summary():
+    students = Student.objects.all()
     for student in students:
-        # Prepare the performance report for the student
-        report = f'Weekly performance summary for {student.name}...'
+        # Example logic to compile attendance and grades
+        grades = Grade.objects.filter(student=student)
+        attendance = Attendance.objects.filter(student=student, date__gte=datetime.now() - timedelta(days=7))
+
+        # Create a summary string or template
+        summary = f"Weekly Performance Summary for {student.name}:\n"
+        summary += f"Grades:\n" + "\n".join([f"{grade.course.name}: {grade.grade}" for grade in grades])
+        summary += "\nAttendance:\n" + "\n".join([f"{att.date}: {att.status}" for att in attendance])
 
         send_mail(
             'Weekly Performance Report',
-            report,
-            'from@example.com',  # Replace with your email
-            [student.user.email],
+            summary,
+            'admin@example.com',
+            [student.email],
             fail_silently=False,
         )
-    return 'Weekly performance report sent to all students.'
+    return f'Sent weekly performance summaries to {students.count()} students.'

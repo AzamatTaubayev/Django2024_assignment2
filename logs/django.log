@@ -327,3 +327,4 @@ WARNING 2024-11-21 16:23:57,400 log Not Found: /api/students/1/
 INFO 2024-11-21 16:24:04,233 autoreload Watching for file changes with StatReloader
 WARNING 2024-11-21 16:24:07,710 log Not Found: /
 WARNING 2024-11-21 16:24:07,710 basehttp "GET / HTTP/1.1" 404 2950
+WARNING 2024-11-22 10:55:44,859 log Not Found: /api/students/1/
